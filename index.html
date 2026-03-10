@@ -32,7 +32,7 @@
     top: 10px;
     right: 10px;
     z-index: 1001;
-    background: #9C27B0;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 8px;
@@ -46,7 +46,7 @@
   }
   
   .menu-toggle:hover {
-    background: #7B1FA2;
+    background: #0056b3;
   }
   
   @media (max-width: 768px) {
@@ -83,7 +83,7 @@
     
     .main-content {
       width: 100%;
-      height: 100vh;
+      height: 100dvh;
       padding: 0;
       display: flex;
       flex-direction: column;
@@ -94,6 +94,7 @@
       margin: 65px 10px 10px 10px;
       border-radius: 4px;
       min-height: 0;
+      margin-bottom: 30px;
     }
   }
   
@@ -174,6 +175,9 @@
     max-width: 100%;
     max-height: 100%;
     position: relative;
+
+    /* To show scrollbar when vertical fill mode is 'grow-canvas' */
+    overflow-y: auto;
   }
   
   .canvas-container canvas {
@@ -236,7 +240,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #9C27B0;
+    background: #007bff;
     cursor: pointer;
   }
   
@@ -244,14 +248,14 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #9C27B0;
+    background: #007bff;
     cursor: pointer;
     border: none;
   }
   
   .control-group label span {
     font-weight: 600;
-    color: #9C27B0;
+    color: #333;
   }
   
   .control-group input[type="checkbox"] {
@@ -435,7 +439,7 @@
     </div>
     
     <div class="control-group">
-      <button id="setItemsBtn" style="background: #9C27B0;">Set Items (JSON)</button>
+      <button id="setItemsBtn">Set Items (JSON)</button>
     </div>
     
     <div class="divider"></div>
@@ -505,6 +509,16 @@
       </div>
     </div>
     
+    <div class="control-group">
+      <label>Wheel Sensitivity: <span id="wheelSensitivityValue">1.0</span></label>
+      <input type="range" id="wheelSensitivity" min="0.1" max="3" value="1.0" step="0.1">
+    </div>
+    
+    <div class="control-group">
+      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">0.1</span></label>
+      <input type="range" id="pinchSensitivity" min="0.02" max="0.3" value="0.1" step="0.02">
+    </div>
+    
     <div class="divider"></div>
     
     <h3>Legend</h3>
@@ -524,6 +538,34 @@
         <option value="center" selected>Center</option>
         <option value="end">End</option>
       </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Category Marker Style</label>
+      <select id="legendMarkerStyle">
+        <option value="square">Square</option>
+        <option value="square-rounded" selected>Square Rounded</option>
+        <option value="circle">Circle</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Category Gap: <span id="legendGapValue">6</span>px</label>
+      <input type="range" id="legendGap" min="0" max="20" value="6" step="1">
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="legendHighlightOnHover" checked>
+        <label for="legendHighlightOnHover">Highlight on Category Hover</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="legendFilterOnClick" checked>
+        <label for="legendFilterOnClick">Filter on Category Click</label>
+      </div>
     </div>
     
     <div class="divider"></div>
@@ -604,7 +646,7 @@
 ]'></textarea>
       <div class="dialog-buttons">
         <button class="secondary" id="cancelSetItems">Cancel</button>
-        <button id="applySetItems" style="background: #9C27B0;">Apply</button>
+        <button id="applySetItems">Apply</button>
       </div>
     </div>
   </div>
@@ -705,12 +747,18 @@
         position: document.getElementById('rangePosition').value,
         fixed: document.getElementById('rangeFixed').checked,
         zoom: {
-          enabled: document.getElementById('zoomEnabled').checked
+          enabled: document.getElementById('zoomEnabled').checked,
+          wheelSensitivity: parseFloat(document.getElementById('wheelSensitivity').value),
+          pinchSensitivity: parseFloat(document.getElementById('pinchSensitivity').value)
         }
       },
       legend: {
         position: document.getElementById('legendPosition').value,
-        alignment: document.getElementById('legendAlignment').value
+        alignment: document.getElementById('legendAlignment').value,
+        markerStyle: document.getElementById('legendMarkerStyle').value,
+        gap: parseInt(document.getElementById('legendGap').value),
+        isHighlightOnHover: document.getElementById('legendHighlightOnHover').checked,
+        isFilterOnClick: document.getElementById('legendFilterOnClick').checked
       },
       tooltip: {
         enabled: document.getElementById('tooltipEnabled').checked,
@@ -756,6 +804,18 @@
   
   document.getElementById('borderThickness').addEventListener('input', (e) => {
     document.getElementById('borderThicknessValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('legendGap').addEventListener('input', (e) => {
+    document.getElementById('legendGapValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('wheelSensitivity').addEventListener('input', (e) => {
+    document.getElementById('wheelSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+  
+  document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
+    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(2);
   });
 
   // Set Items Dialog handlers
