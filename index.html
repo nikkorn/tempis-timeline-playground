@@ -1,957 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Timeline Playground</title>
-  <script src="tempis_timeline.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempis Timeline - Test Files</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .test-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .test-card h2 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .test-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .featured {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .featured h2 {
+            color: white;
+        }
+
+        .featured p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .featured {
+                grid-column: 1;
+            }
+        }
+    </style>
 </head>
-<style>
-  * {
-    box-sizing: border-box;
-  }
-  
-  html {
-    background-color: #f5f5f5;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body {
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    gap: 20px;
-    height: 100vh;
-  }
-  
-  .menu-toggle {
-    display: none;
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1001;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    width: 42px;
-    height: 42px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    font-size: 24px;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .menu-toggle:hover {
-    background: #0056b3;
-  }
-  
-  @media (max-width: 768px) {
-    body {
-      padding: 0;
-      gap: 0;
-    }
-    
-    .menu-toggle {
-      display: flex;
-    }
-    
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -100%;
-      height: 100vh;
-      width: 85%;
-      max-width: 100vw;
-      z-index: 1000;
-      border-radius: 0;
-      transition: left 0.3s ease, visibility 0s 0.3s;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
-      visibility: hidden;
-      pointer-events: none;
-    }
-    
-    .sidebar.open {
-      left: 0;
-      visibility: visible;
-      pointer-events: auto;
-      transition: left 0.3s ease, visibility 0s 0s;
-    }
-    
-    .main-content {
-      width: 100%;
-      height: 100dvh;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .canvas-container {
-      flex: 1;
-      margin: 65px 10px 10px 10px;
-      border-radius: 4px;
-      min-height: 0;
-      overflow-y: hidden !important;
-    }
-  }
-  
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-  }
-  
-  .sidebar-overlay.active {
-    display: block;
-  }
-  
-  .sidebar {
-    width: 320px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    padding: 20px;
-    overflow-y: auto;
-    flex-shrink: 0;
-  }
-  
-  /* Passive scrollbar - only visible on hover */
-  .sidebar::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  .sidebar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .sidebar::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 4px;
-  }
-  
-  .sidebar:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-  }
-  
-  .sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
-  }
-  
-  /* Firefox scrollbar styling */
-  .sidebar {
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-  }
-  
-  .sidebar:hover {
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-  }
-  
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-  }
-  
-  .canvas-container {
-    height: 100%;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    overflow: hidden;
-    resize: both;
-    min-width: 250px;
-    min-height: 250px;
-    max-width: 100%;
-    max-height: 100%;
-    position: relative;
-
-    /* To show scrollbar when vertical fill mode is 'grow-canvas' */
-    overflow-y: auto;
-  }
-  
-  .canvas-container canvas {
-    display: block;
-    box-sizing: border-box;
-  }
-  
-  h2 {
-    margin: 0 0 20px 0;
-    font-size: 20px;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
-  }
-  
-  h3 {
-    margin: 20px 0 10px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .control-group {
-    margin-bottom: 16px;
-  }
-  
-  .control-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: #444;
-  }
-  
-  .control-group input[type="number"],
-  .control-group input[type="text"],
-  .control-group select {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: inherit;
-  }
-  
-  .control-group input[type="range"] {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: #e0e0e0;
-    outline: none;
-    -webkit-appearance: none;
-  }
-  
-  .control-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #007bff;
-    cursor: pointer;
-  }
-  
-  .control-group input[type="range"]::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #007bff;
-    cursor: pointer;
-    border: none;
-  }
-  
-  .control-group label span {
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .control-group input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-  }
-  
-  .checkbox-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .checkbox-wrapper label {
-    margin: 0;
-    cursor: pointer;
-  }
-  
-  .radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .radio-option input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-  }
-  
-  .radio-option label {
-    margin: 0;
-    font-weight: normal;
-    cursor: pointer;
-  }
-  
-  button {
-    width: 100%;
-    padding: 10px;
-    background: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  button:hover {
-    background: #1976D2;
-  }
-  
-  button:active {
-    background: #0D47A1;
-  }
-  
-  .info-box {
-    background: #e3f2fd;
-    padding: 12px;
-    border-radius: 4px;
-    border-left: 4px solid #2196F3;
-    font-size: 12px;
-    color: #555;
-    margin-top: 20px;
-  }
-  
-  .divider {
-    height: 1px;
-    background: #e0e0e0;
-    margin: 20px 0;
-  }
-  
-  .dialog-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .dialog-overlay.active {
-    display: flex;
-  }
-  
-  .dialog {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    padding: 24px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .dialog h2 {
-    margin: 0 0 16px 0;
-    font-size: 20px;
-    color: #333;
-  }
-  
-  .dialog textarea {
-    width: 100%;
-    min-height: 300px;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    resize: vertical;
-    margin-bottom: 16px;
-  }
-  
-  .dialog-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-  }
-  
-  .dialog-buttons button {
-    width: auto;
-    min-width: 100px;
-  }
-  
-  .dialog-buttons button.secondary {
-    background: #757575;
-  }
-  
-  .dialog-buttons button.secondary:hover {
-    background: #616161;
-  }
-  
-  .error-message {
-    color: #f44336;
-    font-size: 13px;
-    margin-bottom: 12px;
-    display: none;
-  }
-  
-  .error-message.active {
-    display: block;
-  }
-</style>
 <body>
-  <button class="menu-toggle" id="menuToggle">☰</button>
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <div class="sidebar" id="sidebar">
-    <h3 style="margin-top:0px;">Data</h3>
-    <div class="control-group">
-      <label>Number of Items</label>
-      <input type="number" id="itemCount" value="100" min="1" max="1000">
-    </div>
-    
-    <div class="control-group">
-      <label>Number of Groups</label>
-      <input type="number" id="groupCount" value="5" min="1" max="10">
-    </div>
-    
-    <div class="control-group">
-      <label>Number of Categories</label>
-      <input type="number" id="categoryCount" value="5" min="0" max="20">
-    </div>
-    
-    <div class="control-group">
-      <label>PIT Item Ratio (%)</label>
-      <input type="number" id="pitRatio" value="30" min="0" max="100">
-    </div>
-    
-    <div class="control-group">
-      <button id="setItemsBtn">Set Items (JSON)</button>
-    </div>
-    
-    <div class="divider"></div>
-    
-    <h3>Layout</h3>
-    <div class="control-group">
-      <label>Stack Mode</label>
-      <div class="radio-group">
-        <div class="radio-option">
-          <input type="radio" id="stackCompact" name="stackMode" value="compact">
-          <label for="stackCompact">Compact</label>
+    <div class="container">
+        <h1>Tempis Timeline Test Files</h1>
+        
+        <div class="test-grid">
+            <a href="test/playground.html" class="test-card featured">
+                <h2>🎮 Playground</h2>
+                <p>Interactive testing environment with comprehensive controls for all timeline options. Adjust layout, styling, data, and behavior in real-time.</p>
+            </a>
+
+            <a href="test/streaming-data.html" class="test-card featured">
+                <h2>📡 Crypto Price Stream</h2>
+                <p>Live cryptocurrency price stream via WebSocket demonstrating real-time data updates. Shows 10 cryptocurrencies with color-coded price movements (green for increases, red for decreases).</p>
+            </a>
+
+            <a href="test/keypress.html" class="test-card featured">
+                <h2>⌨️ Keypress Timeline</h2>
+                <p>Interactive keyboard event visualization. Short presses create point-in-time items, long presses create range items that update in real-time as you hold the key.</p>
+            </a>
+
+            <a href="test/basic.html" class="test-card">
+                <h2>Basic</h2>
+                <p>Simple timeline demonstration with basic configuration and sample data.</p>
+            </a>
+
+            <a href="test/bands.html" class="test-card">
+                <h2>Bands</h2>
+                <p>Timeline with custom time bands showing different time unit divisions.</p>
+            </a>
+
+            <a href="test/categories.html" class="test-card">
+                <h2>Categories</h2>
+                <p>Demonstrates item categorization with legend, filtering, and color-coded items.</p>
+            </a>
+
+            <a href="test/downtime.html" class="test-card">
+                <h2>Downtime</h2>
+                <p>Specialized view for tracking system downtime and availability periods.</p>
+            </a>
+
+            <a href="test/focus.html" class="test-card">
+                <h2>Focus</h2>
+                <p>Tests the focus() method for programmatically navigating to specific time ranges.</p>
+            </a>
+
+            <a href="test/fullscreen.html" class="test-card">
+                <h2>Fullscreen</h2>
+                <p>Timeline that fills the entire viewport with fullscreen capabilities.</p>
+            </a>
+
+            <a href="test/ltr.html" class="test-card">
+                <h2>Left-to-Right</h2>
+                <p>Standard left-to-right timeline layout (default direction).</p>
+            </a>
+
+            <a href="test/rtl.html" class="test-card">
+                <h2>Right-to-Left</h2>
+                <p>Right-to-left timeline layout for RTL language support.</p>
+            </a>
+
+            <a href="test/min_max.html" class="test-card">
+                <h2>Min/Max Range</h2>
+                <p>Timeline with constrained minimum and maximum date ranges.</p>
+            </a>
+
+            <a href="test/opc.html" class="test-card">
+                <h2>OPC</h2>
+                <p>Industrial automation timeline example with OPC data visualization.</p>
+            </a>
+
+            <a href="test/selection.html" class="test-card">
+                <h2>Selection</h2>
+                <p>Tests item selection modes: single, multiple, and none.</p>
+            </a>
+
+            <a href="test/set-items.html" class="test-card">
+                <h2>Set Items</h2>
+                <p>Demonstrates dynamically updating timeline items using setItems() method.</p>
+            </a>
+
+            <a href="test/single-item.html" class="test-card">
+                <h2>Single Item</h2>
+                <p>Minimal timeline with a single item for testing edge cases.</p>
+            </a>
+
+            <a href="test/stack-mode.html" class="test-card">
+                <h2>Stack Mode</h2>
+                <p>Compares compact vs stable stack modes for item vertical arrangement.</p>
+            </a>
+
+            <a href="test/static.html" class="test-card">
+                <h2>Static</h2>
+                <p>Non-interactive timeline with fixed range and disabled user controls.</p>
+            </a>
+
+            <a href="test/stress-test.html" class="test-card">
+                <h2>Stress Test</h2>
+                <p>Performance testing with large datasets and many items.</p>
+            </a>
+
+            <a href="test/styling.html" class="test-card">
+                <h2>Styling</h2>
+                <p>Custom styling examples with different colors, fonts, and visual themes.</p>
+            </a>
+
+            <a href="test/tooltips.html" class="test-card">
+                <h2>Tooltips</h2>
+                <p>Interactive tooltips showing item details on hover.</p>
+            </a>
+
+            <a href="test/vertical-fill.html" class="test-card">
+                <h2>Vertical Fill</h2>
+                <p>Tests different vertical fill modes: grow-canvas, scroll, and fixed.</p>
+            </a>
         </div>
-        <div class="radio-option">
-          <input type="radio" id="stackStable" name="stackMode" value="stable" checked>
-          <label for="stackStable">Stable</label>
-        </div>
-      </div>
     </div>
-    
-    <div class="control-group">
-      <label>Vertical Fill</label>
-      <select id="verticalFill">
-        <option value="content">Content</option>
-        <option value="fill-canvas">Fill Canvas</option>
-        <option value="grow-canvas">Grow Canvas</option>
-      </select>
-    </div>
-    
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="responsive" checked>
-        <label for="responsive">Responsive</label>
-      </div>
-    </div>
-    
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="rtl">
-        <label for="rtl">Right-to-Left</label>
-      </div>
-    </div>
-    
-    <div class="divider"></div>
-    
-    <h3>Range</h3>
-    <div class="control-group">
-      <label>Position</label>
-      <select id="rangePosition">
-        <option value="top">Top</option>
-        <option value="bottom" selected>Bottom</option>
-        <option value="both">Both</option>
-        <option value="none">None</option>
-      </select>
-    </div>
-    
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="rangeFixed">
-        <label for="rangeFixed">Fixed Range</label>
-      </div>
-    </div>
-    
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="zoomEnabled" checked>
-        <label for="zoomEnabled">Zoom Enabled</label>
-      </div>
-    </div>
-    
-    <div class="control-group">
-      <label>Wheel Sensitivity: <span id="wheelSensitivityValue">1.0</span></label>
-      <input type="range" id="wheelSensitivity" min="0.1" max="8" value="1.0" step="0.1">
-    </div>
-    
-    <div class="control-group">
-      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">1.0</span></label>
-      <input type="range" id="pinchSensitivity" min="0.1" max="8" value="1.0" step="0.1">
-    </div>
-    
-    <div class="divider"></div>
-    
-    <h3>Legend</h3>
-    <div class="control-group">
-      <label>Position</label>
-      <select id="legendPosition">
-        <option value="top">Top</option>
-        <option value="bottom" selected>Bottom</option>
-        <option value="none">None</option>
-      </select>
-    </div>
-    
-    <div class="control-group">
-      <label>Alignment</label>
-      <select id="legendAlignment">
-        <option value="start">Start</option>
-        <option value="center" selected>Center</option>
-        <option value="end">End</option>
-      </select>
-    </div>
-    
-    <div class="control-group">
-      <label>Category Marker Style</label>
-      <select id="legendMarkerStyle">
-        <option value="square">Square</option>
-        <option value="square-rounded" selected>Square Rounded</option>
-        <option value="circle">Circle</option>
-      </select>
-    </div>
-    
-    <div class="control-group">
-      <label>Category Gap: <span id="legendGapValue">6</span>px</label>
-      <input type="range" id="legendGap" min="0" max="20" value="6" step="1">
-    </div>
-    
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="legendHighlightOnHover" checked>
-        <label for="legendHighlightOnHover">Highlight on Category Hover</label>
-      </div>
-    </div>
-    
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="legendFilterOnClick" checked>
-        <label for="legendFilterOnClick">Filter on Category Click</label>
-      </div>
-    </div>
-    
-    <div class="divider"></div>
-    
-    <h3>Selection</h3>
-    <div class="control-group">
-      <label>Mode</label>
-      <select id="selectionMode">
-        <option value="none" selected>None</option>
-        <option value="single">Single</option>
-        <option value="multi">Multi</option>
-      </select>
-    </div>
-    
-    <div class="divider"></div>
-    
-    <h3>Style</h3>
-    <div class="control-group">
-      <label>Font Size: <span id="fontSizeValue">14</span>px</label>
-      <input type="range" id="fontSize" min="8" max="28" value="14" step="1">
-    </div>
-    
-    <div class="control-group">
-      <label>Item Padding: <span id="itemPaddingValue">10</span>px</label>
-      <input type="range" id="itemPadding" min="5" max="25" value="10" step="1">
-    </div>
-    
-    <div class="control-group">
-      <label>Border Radius: <span id="borderRadiusValue">5</span>px</label>
-      <input type="range" id="borderRadius" min="0" max="30" value="5" step="1">
-    </div>
-    
-    <div class="control-group">
-      <label>Border Thickness: <span id="borderThicknessValue">0</span>px</label>
-      <input type="range" id="borderThickness" min="0" max="5" value="0" step="1">
-    </div>
-    
-    <div class="divider"></div>
-    
-    <h3>Tooltip</h3>
-    <div class="control-group">
-      <div class="checkbox-wrapper">
-        <input type="checkbox" id="tooltipEnabled" checked>
-        <label for="tooltipEnabled">Enabled</label>
-      </div>
-    </div>
-    
-    <div class="control-group">
-      <label>Overflow Behavior</label>
-      <select id="tooltipOverflow">
-        <option value="none">None</option>
-        <option value="canvas" selected>Canvas</option>
-        <option value="viewport">Viewport</option>
-      </select>
-    </div>
-  </div>
-  
-  <div class="main-content">
-    <div class="canvas-container">
-      <canvas id="canvas"></canvas>
-    </div>
-  </div>
-  
-  <!-- Set Items Dialog -->
-  <div class="dialog-overlay" id="setItemsDialog">
-    <div class="dialog">
-      <h2>Set Items (JSON)</h2>
-      <div class="error-message" id="jsonError"></div>
-      <textarea id="itemsJson" placeholder='[
-  {
-    "id": 1,
-    "label": "Item 1",
-    "start": "2024-01-15T10:00:00",
-    "end": "2024-01-20T15:00:00",
-    "category": "Category-1",
-    "grouping": "Group-1"
-  }
-]'></textarea>
-      <div class="dialog-buttons">
-        <button class="secondary" id="cancelSetItems">Cancel</button>
-        <button id="applySetItems">Apply</button>
-      </div>
-    </div>
-  </div>
 </body>
-<script>
-  function getRandomItem(array) {
-    return array[Math.floor(Math.random() * array.length)];
-  }
-
-  function getRandomDatePeriod(startDate, endDate) {
-    const start = startDate.getTime();
-    const end = endDate.getTime();
-    const t1 = start + Math.random() * (end - start);
-    const t2 = start + Math.random() * (end - start);
-    return {
-      start: new Date(Math.min(t1, t2)),
-      end: new Date(Math.max(t1, t2))
-    };
-  }
-
-  function generateCategories(categoryCount) {
-    const colors = [
-      "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0",
-      "#00BCD4", "#FFEB3B", "#795548", "#607D8B", "#F44336"
-    ];
-    
-    return Array.from({ length: categoryCount }, (_, i) => ({
-      name: `Category-${i + 1}`,
-      label: `Category ${i + 1}`,
-      style: { backgroundColor: colors[i % colors.length] }
-    }));
-  }
-
-  function generateItems(itemCount, groupCount, categoryCount, pitRatio) {
-    const minDate = new Date("2024-01-01T00:00:00");
-    const maxDate = new Date("2024-03-01T00:00:00");
-    const categories = Array.from({ length: categoryCount }, (_, i) => `Category-${i + 1}`);
-    const groups = Array.from({ length: groupCount }, (_, i) => `Group-${i + 1}`);
-    const items = [];
-
-    for (let i = 0; i < itemCount; i++) {
-      const randomDatePeriod = getRandomDatePeriod(minDate, maxDate);
-      const isPit = Math.random() * 100 < pitRatio;
-
-      items.push({
-        id: i,
-        label: `Item ${i}`,
-        start: randomDatePeriod.start,
-        end: isPit ? undefined : randomDatePeriod.end,
-        category: getRandomItem(categories),
-        grouping: getRandomItem(groups),
-      });
-    }
-
-    return items;
-  }
-
-  let timeline = null;
-  let currentItems = [];
-  let lastDataConfig = { itemCount: 0, groupCount: 0, categoryCount: 0, pitRatio: 0 };
-
-  function getTimelineOptions() {
-    const itemCount = parseInt(document.getElementById('itemCount').value);
-    const groupCount = parseInt(document.getElementById('groupCount').value);
-    const categoryCount = parseInt(document.getElementById('categoryCount').value);
-    const pitRatio = parseInt(document.getElementById('pitRatio').value);
-    
-    // Only regenerate items if data configuration changed
-    if (currentItems.length === 0 ||
-        lastDataConfig.itemCount !== itemCount ||
-        lastDataConfig.groupCount !== groupCount ||
-        lastDataConfig.categoryCount !== categoryCount ||
-        lastDataConfig.pitRatio !== pitRatio) {
-      currentItems = generateItems(itemCount, groupCount, categoryCount, pitRatio);
-      lastDataConfig = { itemCount, groupCount, categoryCount, pitRatio };
-    }
-    
-    const items = currentItems;
-
-    return {
-      responsive: document.getElementById('responsive').checked,
-      rtl: document.getElementById('rtl').checked,
-      stackMode: document.querySelector('input[name="stackMode"]:checked').value,
-      verticalFill: document.getElementById('verticalFill').value,
-      selection: document.getElementById('selectionMode').value,
-      style: {
-        font: {
-          size: parseInt(document.getElementById('fontSize').value)
-        },
-        item: {
-          padding: parseInt(document.getElementById('itemPadding').value),
-          borderRadius: parseInt(document.getElementById('borderRadius').value),
-          borderThickness: parseInt(document.getElementById('borderThickness').value) || undefined,
-          borderColor: parseInt(document.getElementById('borderThickness').value) > 0 ? '#333333' : undefined
-        }
-      },
-      range: {
-        position: document.getElementById('rangePosition').value,
-        fixed: document.getElementById('rangeFixed').checked,
-        zoom: {
-          enabled: document.getElementById('zoomEnabled').checked,
-          wheelSensitivity: parseFloat(document.getElementById('wheelSensitivity').value),
-          pinchSensitivity: parseFloat(document.getElementById('pinchSensitivity').value)
-        }
-      },
-      legend: {
-        position: document.getElementById('legendPosition').value,
-        alignment: document.getElementById('legendAlignment').value,
-        markerStyle: document.getElementById('legendMarkerStyle').value,
-        gap: parseInt(document.getElementById('legendGap').value),
-        isHighlightOnHover: document.getElementById('legendHighlightOnHover').checked,
-        isFilterOnClick: document.getElementById('legendFilterOnClick').checked
-      },
-      tooltip: {
-        enabled: document.getElementById('tooltipEnabled').checked,
-        overflowBehavior: document.getElementById('tooltipOverflow').value
-      },
-      categories: generateCategories(categoryCount),
-      items
-    };
-  }
-
-  function regenerateTimeline() {
-    // Destroy existing timeline
-    if (timeline) {
-      timeline.destroy();
-    }
-
-    // Create new timeline with current settings
-    const options = getTimelineOptions();
-    timeline = new tempis_timeline.TempisTimeline("#canvas", options);
-    window["timeline"] = timeline;
-  }
-
-  // Initialize timeline on load
-  regenerateTimeline();
-
-  // Add event listeners to all controls
-  document.querySelectorAll('input, select').forEach(control => {
-    control.addEventListener('change', regenerateTimeline);
-  });
-
-  // Add input event listeners for range sliders to update value displays in real-time
-  document.getElementById('fontSize').addEventListener('input', (e) => {
-    document.getElementById('fontSizeValue').textContent = e.target.value;
-  });
-  
-  document.getElementById('itemPadding').addEventListener('input', (e) => {
-    document.getElementById('itemPaddingValue').textContent = e.target.value;
-  });
-  
-  document.getElementById('borderRadius').addEventListener('input', (e) => {
-    document.getElementById('borderRadiusValue').textContent = e.target.value;
-  });
-  
-  document.getElementById('borderThickness').addEventListener('input', (e) => {
-    document.getElementById('borderThicknessValue').textContent = e.target.value;
-  });
-  
-  document.getElementById('legendGap').addEventListener('input', (e) => {
-    document.getElementById('legendGapValue').textContent = e.target.value;
-  });
-  
-  document.getElementById('wheelSensitivity').addEventListener('input', (e) => {
-    document.getElementById('wheelSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
-  });
-  
-  document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
-    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
-  });
-
-  // Set Items Dialog handlers
-  const setItemsDialog = document.getElementById('setItemsDialog');
-  const setItemsBtn = document.getElementById('setItemsBtn');
-  const cancelSetItems = document.getElementById('cancelSetItems');
-  const applySetItems = document.getElementById('applySetItems');
-  const itemsJsonTextarea = document.getElementById('itemsJson');
-  const jsonError = document.getElementById('jsonError');
-
-  setItemsBtn.addEventListener('click', () => {
-    setItemsDialog.classList.add('active');
-    jsonError.classList.remove('active');
-    jsonError.textContent = '';
-  });
-
-  cancelSetItems.addEventListener('click', () => {
-    setItemsDialog.classList.remove('active');
-  });
-
-  // Close dialog when clicking outside
-  setItemsDialog.addEventListener('click', (e) => {
-    if (e.target === setItemsDialog) {
-      setItemsDialog.classList.remove('active');
-    }
-  });
-
-  applySetItems.addEventListener('click', () => {
-    try {
-      const itemsJson = itemsJsonTextarea.value.trim();
-      
-      if (!itemsJson) {
-        throw new Error('Please enter JSON data');
-      }
-
-      const items = JSON.parse(itemsJson);
-
-      if (!Array.isArray(items)) {
-        throw new Error('JSON must be an array of items');
-      }
-
-      // Validate items have required fields
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (!item.id && item.id !== 0) {
-          throw new Error(`Item at index ${i} is missing required field: id`);
-        }
-        if (!item.start) {
-          throw new Error(`Item at index ${i} is missing required field: start`);
-        }
-      }
-
-      // Extract unique categories from the items
-      const uniqueCategories = new Set();
-      items.forEach(item => {
-        if (item.category) {
-          uniqueCategories.add(item.category);
-        }
-      });
-
-      // Generate category definitions ONLY for categories found in the JSON items
-      const colors = [
-        "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0",
-        "#00BCD4", "#FFEB3B", "#795548", "#607D8B", "#F44336"
-      ];
-      
-      const categories = Array.from(uniqueCategories).map((catName, i) => ({
-        name: catName,
-        label: catName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        style: { backgroundColor: colors[i % colors.length] }
-      }));
-
-      // Destroy the existing timeline
-      if (timeline) {
-        timeline.destroy();
-      }
-
-      // Get current options (for non-data settings like layout, style, etc.)
-      const options = getTimelineOptions();
-      
-      // Override with custom items and categories from JSON
-      // If no categories in JSON, use empty array (no categories)
-      options.items = items;
-      options.categories = categories;
-      
-      // Create new timeline with custom items
-      timeline = new tempis_timeline.TempisTimeline("#canvas", options);
-      window["timeline"] = timeline;
-      
-      // Update currentItems to prevent regeneration
-      currentItems = items;
-      
-      // Close the dialog
-      setItemsDialog.classList.remove('active');
-      jsonError.classList.remove('active');
-    } catch (error) {
-      jsonError.textContent = error.message;
-      jsonError.classList.add('active');
-      console.error('Error setting items:', error);
-    }
-  });
-
-  // Mobile menu toggle
-  const menuToggle = document.getElementById('menuToggle');
-  const sidebar = document.getElementById('sidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    sidebarOverlay.classList.add('active');
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('active');
-  }
-
-  menuToggle.addEventListener('click', () => {
-    if (sidebar.classList.contains('open')) {
-      closeSidebar();
-    } else {
-      openSidebar();
-    }
-  });
-
-  sidebarOverlay.addEventListener('click', closeSidebar);
-
-  // Close sidebar when clicking on controls (mobile only)
-  if (window.innerWidth <= 768) {
-    document.querySelectorAll('.sidebar input, .sidebar select, .sidebar button').forEach(control => {
-      control.addEventListener('change', () => {
-        // Small delay to allow the change to process
-        setTimeout(closeSidebar, 100);
-      });
-    });
-  }
-
-</script>
 </html>
